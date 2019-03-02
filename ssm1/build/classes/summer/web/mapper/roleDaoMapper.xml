@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <!-- 为这个mapper指定一个唯一的namespace  -->
+  <mapper namespace="summer.web.dao.RoleDao">
+  <!-- 配置结果集和类的映射关系 -->
+  <resultMap id="roleResultMap" type="summer.web.entity.Role">
+    <!-- 配置主键映射 -->
+    <id property="roleId" column="role_id" />
+    <!-- 配置普通字段的映射 -->
+    <result property="roleName" column="role_name"  />
+    <result property="roleDesc" column="role_desc" />
+    <result property="status" column="status" />
+  </resultMap>
+  <select id="getByEmpId" parameterType="int" 
+         resultMap="roleResultMap">
+         	select R.role_id, R.role_name, R.role_desc, R.status
+			from role R inner join employees E 
+			on R.role_id=E.role_id
+			where emp_id=#{empId} 
+  </select>
+  <select id="getAll" parameterType="int" 
+         resultMap="roleResultMap">
+         select role_id,role_name,role_desc,status from role
+  </select>
+     <!-- 在select标签中编写查询的SQL语句， 设置select标签的id属性为getCount，id属性值必须是唯一的，不能够重复。
+     使用parameterType属性指明查询时使用的参数类型，resultType属性指明查询返回的结果集类型  -->
+	 <!-- 查询所有员工数量 -->
+   	  <!-- select id="getCount" resultType="int">
+    	select count(*) from employees
+  	  </select>    
+	 根据id查询得到一个Employee对象
+      <select id="getById" parameterType="int" 
+         resultMap="employeeResultMap">
+         select emp_id,emp_name,emp_password,sex,birthday,role_id,status from employees where emp_id=#{empId}
+      </select>
+      <select id="getByName" parameterType="String" resultMap="employeeResultMap">
+      	 select * from employees where emp_name=#{empName}
+      </select> -->
+      <!-- <select id="getAll" parameterType="int" 
+         resultMap="rightResultMap">
+         select * from rights
+      </select> -->
+      <select id="getById" parameterType="int" 
+         resultMap="roleResultMap">
+        	select * from role where role_id=#{roleId} 
+      </select>
+       <select id="getByPage" parameterType="map" 
+         resultMap="roleResultMap">
+         select * from role where 1=1
+         <if test="roleName!=null and roleName!=''">
+         	and role_name like CONCAT(CONCAT('%', #{roleName}), '%')
+         </if>
+      <!--    <if test="sex!=-1">
+         	and sex=#{sex}
+         </if>
+       	<if test="startBirthday!=null">
+         	and birthday >= #{startBirthday}
+         </if>
+         <if test="endBirthday!=null">
+         	and birthday <![CDATA[<=]]> #{endBirthday}
+         </if>
+         <if test="roleId!=0">
+         	and role_id=#{roleId}
+         </if> -->
+         <if test="status!=-1">
+         	and status=#{status}
+         </if>
+       <!--   <if test="firstResult>=0 and pageSize!=0">
+         	limit #{firstResult},#{pageSize}
+         </if> -->
+      </select>
+ 
+      <insert id="insert" useGeneratedKeys="true"
+    keyProperty="roleId" parameterType="summer.web.entity.Role">
+	    insert into role (role_name,role_desc,status)
+	    values (#{roleName},#{roleDesc},#{status})
+	  </insert>
+	  
+	  <update id="update" parameterType="summer.web.entity.Role">
+	  	update role set role_name=#{roleName}, role_desc=#{roleDesc}, status=#{status} where role_id=#{roleId}
+	  </update>
+	  
+	  <delete id="delete" parameterType="int">
+	  	delete from role where role_id=#{roleId}
+	  </delete> 
+</mapper>

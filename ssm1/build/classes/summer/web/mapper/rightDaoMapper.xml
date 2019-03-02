@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <!-- 为这个mapper指定一个唯一的namespace  -->
+  <mapper namespace="summer.web.dao.RightDao">
+  <!-- 配置结果集和类的映射关系 -->
+  <resultMap id="rightResultMap" type="summer.web.entity.Right">
+    <!-- 配置主键映射 -->
+    <id property="rightId" column="right_id" />
+    <!-- 配置普通字段的映射 -->
+    <result property="rightName" column="right_name"  />
+    <result property="rightDesc" column="right_desc" />
+    <result property="rightUrl" column="right_url" />
+    <result property="rightType" column="right_type" />
+    <result property="parentId" column="parent_id" />
+    <result property="status" column="status" />
+  </resultMap>
+     <!-- 在select标签中编写查询的SQL语句， 设置select标签的id属性为getCount，id属性值必须是唯一的，不能够重复。
+     使用parameterType属性指明查询时使用的参数类型，resultType属性指明查询返回的结果集类型  -->
+	 <!-- 查询所有员工数量 -->
+   	  <!-- select id="getCount" resultType="int">
+    	select count(*) from employees
+  	  </select>    
+	 根据id查询得到一个Employee对象-->
+      <select id="getByRoleId" parameterType="int" 
+         resultMap="rightResultMap">
+        	select * from rights R inner join ref_role_rights S 
+			on R.right_id=S.ref_right_id
+			where ref_role_id=#{roleId} 
+      </select>
+      <select id="getUrlsByRoleId" parameterType="int" 
+         resultType="string">
+        	select right_url from rights R inner join ref_role_rights S 
+			on R.right_id=S.ref_right_id
+			where ref_role_id=#{roleId} 
+      </select>
+      <select id="getById" parameterType="int" 
+         resultMap="rightResultMap">
+        	select * from rights where right_id=#{rightId} 
+      </select>
+      <select id="getByRightType" parameterType="int" resultMap="rightResultMap">
+      	 select * from rights where right_type=#{rightType}
+      </select>
+      <select id="getAll" parameterType="int" 
+         resultMap="rightResultMap">
+         select * from rights
+      </select>
+      <select id="getByPage" parameterType="map" 
+         resultMap="rightResultMap">
+         select * from rights where 1=1
+         <if test="condition.rightName!=null and condition.rightName!=''">
+         	and right_name like CONCAT(CONCAT('%', #{condition.rightName}), '%')
+         </if>
+       	<if test="condition.parentId!=0">
+         	and parent_id = #{condition.parentId}
+         </if>
+         <if test="condition.status!=-1">
+         	and status=#{condition.status}
+         </if>
+         <if test="firstResult>=0 and pageSize!=0">
+         	limit #{firstResult},#{pageSize}
+         </if>
+      </select>
+      
+      <insert id="insert" useGeneratedKeys="true"
+    keyProperty="rightId" parameterType="summer.web.entity.Right">
+   		 
+    	<if test="parentId!=0">
+         	 insert into rights (right_name,right_desc,right_url,right_type,status,parent_id)
+	    	values (#{rightName},#{rightDesc},#{rightUrl},#{rightType},#{status},#{parentId})
+         </if>
+	   <if test="parentId==0">
+         	 insert into rights (right_name,right_desc,right_url,right_type,status)
+	    	values (#{rightName},#{rightDesc},#{rightUrl},#{rightType},#{status})
+         </if>
+	  </insert>
+	  <update id="update" parameterType="summer.web.entity.Right">
+	  	update rights set right_name=#{rightName}, right_desc=#{rightDesc}, right_url=#{rightUrl}, right_type=#{rightType}, status=#{status}, parent_id=#{parentId} where right_id=#{rightId}
+	  </update>
+	  
+	  <delete id="delete" parameterType="int">
+	  	delete from rights where right_id=#{rightId}
+	  </delete> 
+</mapper>

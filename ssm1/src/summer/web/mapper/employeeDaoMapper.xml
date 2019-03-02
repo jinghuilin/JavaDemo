@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <!-- 为这个mapper指定一个唯一的namespace  -->
+  <mapper namespace="summer.web.dao.EmployeeDao">
+  <!-- 配置结果集和类的映射关系 -->
+  <resultMap id="employeeResultMap" type="summer.web.entity.Employee">
+    <!-- 配置主键映射 -->
+    <id property="empId" column="emp_id" />
+    <!-- 配置普通字段的映射 -->
+    <result property="empName" column="emp_name"  />
+    <result property="password" column="password" />
+    <result property="sex" column="sex" />
+    <result property="roleId" column="role_id" />
+    <result property="birthday" column="birthday" />
+    <result property="status" column="status" />
+  </resultMap>
+     
+     <!-- 在select标签中编写查询的SQL语句， 设置select标签的id属性为getCount，id属性值必须是唯一的，不能够重复。
+     使用parameterType属性指明查询时使用的参数类型，resultType属性指明查询返回的结果集类型  -->
+	 <!-- 查询所有员工数量 -->
+   	  <select id="getCount" resultType="int">
+    	select count(*) from employees
+  	  </select>    
+	 <!-- 根据id查询得到一个Employee对象 -->
+      <select id="getById" parameterType="int" 
+         resultMap="employeeResultMap">
+         select emp_id,emp_name,password,sex,birthday,role_id,status from employees where emp_id=#{empId}
+      </select>
+      <select id="getByName" parameterType="String" resultMap="employeeResultMap">
+      	 select * from employees where emp_name=#{empName}
+      </select>
+      <select id="getAll" parameterType="int" 
+         resultMap="employeeResultMap">
+         select emp_id,emp_name,password,sex,birthday,role_id,status from employees
+      </select>
+      <select id="getByPage" parameterType="map" 
+         resultMap="employeeResultMap">
+         select emp_id,emp_name,password,sex,birthday,role_id,status from employees where 1=1
+         <if test="condition.empName!=null and condition.empName!=''">
+         	and emp_name like CONCAT(CONCAT('%', #{condition.empName}), '%')
+         </if>
+         <if test="condition.sex!=-1">
+         	and sex=#{condition.sex}
+         </if>
+       	<if test="condition.startBirthday!=null">
+         	and birthday >= #{condition.startBirthday}
+         </if>
+         <if test="condition.endBirthday!=null">
+         	and birthday <![CDATA[<=]]> #{condition.endBirthday}
+         </if>
+         <if test="condition.roleId!=0">
+         	and role_id=#{condition.roleId}
+         </if>
+         <if test="condition.status!=-1">
+         	and status=#{condition.status}
+         </if>
+         <if test="firstResult>=0 and pageSize!=0">
+         	limit #{firstResult},#{pageSize}
+         </if>
+      </select>
+      <insert id="insert" useGeneratedKeys="true"
+    keyProperty="empId" parameterType="summer.web.entity.Employee">
+	    insert into employees (emp_name,password,sex,birthday,role_id,status)
+	    values (#{empName},#{password},#{sex},#{birthday},#{roleId},#{status})
+	  </insert>
+	  <update id="update" parameterType="summer.web.entity.Employee">
+	  	update employees set emp_name=#{empName}, password=#{password}, sex=#{sex}, birthday=#{birthday}, role_id=#{roleId}, status=#{status} where emp_id=#{empId}
+	  </update>
+	  <delete id="delete" parameterType="int">
+	  	delete from employees where emp_id=#{empId}
+	  </delete>
+</mapper>

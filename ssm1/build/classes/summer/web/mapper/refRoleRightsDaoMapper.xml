@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <!-- 为这个mapper指定一个唯一的namespace  -->
+  <mapper namespace="summer.web.dao.RefRoleRightsDao">
+  <!-- 配置结果集和类的映射关系 -->
+
+    
+      <select id="getById" parameterType="int" resultType="int">
+         select ref_right_id from ref_role_rights where ref_role_id=#{refRoleId}
+      </select>
+      <insert id="insert" parameterType="int">
+	    insert into ref_role_rights (ref_role_id, ref_right_id)
+	    values (#{roleId},#{rightId})
+	  </insert>
+	  <delete id="delete" parameterType="int">
+	  	delete from ref_role_rights where ref_role_id=#{refRoleId}
+	  </delete>
+</mapper>

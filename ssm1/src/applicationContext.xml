@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	 http://www.springframework.org/schema/context
+                http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+	<!-- <context:property-placeholder location="classpath:jdbc.properties"/> -->
+	<!--  <context:component-scan base-package="summer.web.dao.impl" />-->
+	<context:component-scan base-package="summer.web.service.impl" />
+	 <!-- 导入外部的properties文件 -->
+    <!-- <bean id="propertyConfigurer"  
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+        <property name="location" value="classpath:jdbc.properties" />  
+    </bean> -->  
+    
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"  
+        destroy-method="close">  
+        <property name="driverClass" value="com.mysql.jdbc.Driver" />  
+        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/slash" />  
+        <property name="user" value="root" />  
+        <property name="password" value="123456" />  
+        <!-- 配置池化管理参数 -->
+	  <!-- 初始连接数 -->
+	  <property name="initialPoolSize" value="3" />
+	  <!-- 最大活动连接数 -->
+	  <property name="maxPoolSize" value="100" />
+	  <!-- 最大空闲等待时间 -->
+	  <property name="maxIdleTime" value="60"></property>
+	  <!-- 批量增长连接数 -->
+	  <property name="acquireIncrement" value="3"></property>
+  
+    </bean>  
+    <!-- 3.配置SqlSessionFactory 
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+	</bean>-->
+    <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">  
+        <property name="dataSource" ref="dataSource" />  
+        <!--自动扫描mapping.xml文件 -->  
+        <property name="mapperLocations" value="classpath:summer/web/mapper/*.xml"></property>  
+    </bean>  
+    
+    <!--  DAO接口所在包名，Spring会自动查找其下的类  -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">  
+        <property name="basePackage" value="summer.web.dao" />  
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>  
+    </bean>
+    
+     <!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->  
+    <bean id="transactionManager"  
+        class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+        <property name="dataSource" ref="dataSource" />  
+    </bean>  
+	<!-- <bean id="helloBean" class="summer.web.core.HelloWorld">
+		<property name="name" value="Spring" />
+	</bean> -->
+	<bean id="employee" class="summer.web.entity.Employee" />
+	<bean id="right" class="summer.web.entity.Right" />
+	<bean id="role" class="summer.web.entity.Role" />
+	
+	
+	
+	
+	
+	<!-- 配置增强处理bean -->
+	<bean id="loggerAdvice" class="summer.web.aop.LoggerAdvice" />
+	<!-- AOP配置 -->
+	<aop:config>
+		<!-- 定义切面 -->
+		<aop:aspect ref="loggerAdvice">
+			<!-- 定义切入点 -->
+			<aop:pointcut  id="serviceMethod" expression="execution(* summer.web.service.*.*(..))"/>
+			<!-- 将切入点和增强处理结合，形成切面 -->
+			<aop:before method="before" pointcut-ref="serviceMethod"/>
+			<aop:after-returning method="afterReturning" pointcut-ref="serviceMethod"/>
+     		<aop:after-throwing method="afterThrowing" pointcut-ref="serviceMethod"/>
+      		<aop:after method="after" pointcut-ref="serviceMethod"/>
+	    
+      <!-- 配置环绕增强 -->
+      <!-- <aop:around method="around" pointcut-ref="helloPointcut"/> -->
+			
+		</aop:aspect>
+	</aop:config>
+</beans>

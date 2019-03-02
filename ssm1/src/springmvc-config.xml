@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd"
+        >                      
+    <context:component-scan base-package="summer.web.controller"/>
+ 	<!-- HandlerMapping -->  
+ 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>  
+ 
+	 <!-- 这点是必需的还是非必需的呢？  
+	  如果定义了 DefaultAnnotationHandlerMapping，它就可以将请求来的 url 和被注解了 @RequesMapping 的指进行匹配。
+	  当然，说这句话的前提是定义 DefaultAnnotationHandlerMapping 的优先级比定义了其它的 HandlerMapping 
+	  的优先级要高(如果定义了其它的话)。  
+	  如果没有定义 DefaultAnnotationHandlerMapping，并不代表不能映射到相应的 handler 上。因为如果你定义了其它
+	  的 HandlerMapping，请求过来的 url 和注解了的 @RequestMapping 里的值正好能匹配上，那么没有 
+	  DefaultAnnotationHandlerMapping，@Controller 一样可以如鱼得水的被捕获到。  
+	  当然，如果你要使用基于注解的 @Controller，最好还是老老实实地注册 DefaultAnnotationHandlerMapping。  -->  
+ 
+	<!-- <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>  -->
+	   
+	<!-- HandlerAdapter -->  
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />  
+    
+	  <!-- 和上面的 HandlerMapping 一样，是必需的还是非必需的呢？  
+	  Spring MVC 中，如果我们没有注册任何 HandlerAdaptor 到容器中，注意，我说的是任何。
+	  那么 DispatcherServlet 将启用后备的几个默认使用的 HandlerAdaptor 实现，包括：  
+	  org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter  
+	  org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter  
+	  org.springframework.web.servlet.mvc.AnnotationMethodHandlerAdaptor  
+	  
+	   看见没，如果我们没有注册任何的 HandlerAdaptor，框架会准备 AnnotationMethodHandlerAdaptor 的。
+	   可是由于某些原因，我们需要为某些 HandlerAdaptoer 进行一些定制化，即在容器中注册了某个 HandlerAdaptor，
+	   那么很抱歉，框架只会启用你注册的那个，而框架本身准备的不会被启用。所以，你一旦为某个 HandlerMapping 进行了定制化，
+	   请别忘了把其它的 HandlerAdaptor 也注册进来，即便这些不需要定制化。否则的话，后果你是可以想象的。当然，
+	   除非你确保你真的只需要那一个你注册进容器的 HandlerAdaptor，否则，我再啰嗦一遍，别忘了把其它的 HandlerAdaptor 也注册进来。
+	    -->  
+  
+ 
+	<!-- <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/> -->
+	
+	
+	<!-- 处理器 -->  
+	<!-- <bean name="/hello" class="summer.web.controller.HelloWorldController"/>  
+	<bean name="/customerLogin" class="summer.web.controller.CustomerLoginController">
+		<property name="customerService" ref="customerService"></property>
+	</bean> -->
+	
+	
+	
+	<!-- ViewResolver -->  
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
+	    <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>  
+	    <property name="prefix" value="/jsp/"/>  
+	    <property name="suffix" value=".jsp"/>  
+	</bean>  
+	
+	<!--在实际开发中通常都需配置 mvc:annotation-driven标签,这个标签是开启注解--> 
+        <mvc:annotation-driven></mvc:annotation-driven>  
+       <!--  拦截器 --> 
+        <mvc:interceptors>  
+           <!--  多个拦截器，顺序执行  -->
+            <mvc:interceptor>  
+                <mvc:mapping path="/**"/>
+                <bean class="summer.web.interceptor.LoginInterceptor" />
+            </mvc:interceptor>  
+        </mvc:interceptors>
+</beans>
